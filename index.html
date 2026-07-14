@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NUST Research & Publications Eligibility Portal</title>
+    <meta name="description"
+        content="Determine your eligibility and estimate grants for NUST conferences, Article Processing Charges (APC), and Financial Awards (FA).">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Custom Style Sheet -->
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="bg-glow"></div>
+
+    <header class="app-header">
+        <div class="header-container">
+            <div class="brand">
+                <i class="fa-solid fa-graduation-cap logo-icon"></i>
+                <div class="brand-text">
+                    <h1>NUST</h1>
+                    <span>Research Directorate</span>
+                </div>
+            </div>
+            <div class="header-actions">
+                <button id="theme-toggle" class="btn-icon" aria-label="Toggle Theme">
+                    <i class="fa-solid fa-moon"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="app-container">
+        <!-- LANDING PAGE VIEW -->
+        <section id="landing-view" class="view active">
+            <div class="hero-section">
+                <span class="badge">Policy Compliance Assistant</span>
+                <h2>Research Sponsorship & Publication Grants</h2>
+                <p>Quickly determine your eligibility for travel grants, APC sponsorships, and publication financial
+                    awards without the need to call the Research Directorate.</p>
+            </div>
+
+            <div class="cards-grid">
+                <!-- CARD 1: CONFERENCE -->
+                <div class="service-card" onclick="app.startFlow('conference')">
+                    <div class="card-glow"></div>
+                    <div class="card-icon-wrapper cyan">
+                        <i class="fa-solid fa-plane-departure"></i>
+                    </div>
+                    <h3>Conference Sponsorship</h3>
+                    <p>Sponsorship for paper presentation in reputed international and national conferences (Travel
+                        Grant or Registration Fee Only).</p>
+                    <div class="card-footer">
+                        <span>Check Eligibility</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </div>
+                </div>
+
+                <!-- CARD 2: APC -->
+                <div class="service-card" onclick="app.startFlow('apc')">
+                    <div class="card-glow"></div>
+                    <div class="card-icon-wrapper purple">
+                        <i class="fa-solid fa-file-invoice-dollar"></i>
+                    </div>
+                    <h3>Article Processing Charges (APC)</h3>
+                    <p>Sponsorship of publication charges (APC) for research papers accepted in well-reputed journals
+                        (Quartile 1 & 2).</p>
+                    <div class="card-footer">
+                        <span>Check & Calculate Grant</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </div>
+                </div>
+
+                <!-- CARD 3: FA -->
+                <div class="service-card" onclick="app.startFlow('fa')">
+                    <div class="card-glow"></div>
+                    <div class="card-icon-wrapper emerald">
+                        <i class="fa-solid fa-award"></i>
+                    </div>
+                    <h3>Financial Publication Award</h3>
+                    <p>Cash awards for NUST authors who have published research papers in Web of Science JCR indexed
+                        impact factor journals.</p>
+                    <div class="card-footer">
+                        <span>Check & Calculate Award</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="policy-quick-links">
+                <h4><i class="fa-solid fa-circle-info"></i> Quick Policy References</h4>
+                <div class="links-row">
+                    <a href="https://drive.google.com/file/d/12ayKPwL6wS1Aa16DVSdMb4MIWiwPk290/view?usp=sharing"
+                        target="_blank" class="policy-tag"><i class="fa-regular fa-file-pdf"></i> Conference</a>
+                    <a href="https://drive.google.com/file/d/1uVr-ZmnyCxOEbYfJ8WyvT32-GIEvjFtX/view?usp=sharing"
+                        target="_blank" class="policy-tag"><i class="fa-regular fa-file-pdf"></i> APC
+                        Revision</a>
+                    <a href="https://drive.google.com/file/d/1R6-IJMU6r7rKjJndcZ4ak5g-Nzp93PCD/view?usp=sharing"
+                        target="_blank" class="policy-tag"><i class="fa-regular fa-file-pdf"></i> Financial
+                        Award</a>
+                    <span class="policy-tag"><i class="fa-regular fa-clock"></i> Submission Lead Time: 65 Days
+                        (Conference), 4 Weeks (APC)</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- WIZARD/STEPPER VIEW -->
+        <section id="wizard-view" class="view">
+            <div class="wizard-header">
+                <button onclick="app.showHome()" class="btn-back">
+                    <i class="fa-solid fa-chevron-left"></i> Back to Services
+                </button>
+                <button id="btn-prev-question" onclick="app.goBack()" class="btn-back hidden"
+                    style="margin-left: 10px;">
+                    <i class="fa-solid fa-arrow-left"></i> Previous Question
+                </button>
+                <div class="flow-info">
+                    <span id="current-flow-title">Flow Title</span>
+                    <span id="step-indicator">Step 1 of 5</span>
+                </div>
+            </div>
+
+            <div class="progress-bar-container">
+                <div id="progress-bar" class="progress-bar" style="width: 20%;"></div>
+            </div>
+
+            <div class="wizard-content">
+                <!-- Question Card -->
+                <div id="question-card" class="glass-card question-card">
+                    <div class="question-header">
+                        <span class="question-number" id="question-num-tag">Q1.</span>
+                        <h3 id="question-text">Question Text Goes Here?</h3>
+                    </div>
+
+                    <p id="question-desc" class="question-description">Detailed background context explaining why this
+                        matters.</p>
+
+                    <div id="answers-container" class="answers-grid">
+                        <!-- Dynamic Buttons go here -->
+                    </div>
+                </div>
+
+                <!-- Instant Ineligibility Block -->
+                <div id="ineligible-card" class="glass-card result-card ineligible hidden">
+                    <div class="result-icon-wrapper red animate-scale">
+                        <i class="fa-solid fa-circle-xmark"></i>
+                    </div>
+                    <h2>Not Eligible</h2>
+                    <p class="ineligible-reason" id="ineligible-reason-text">You do not meet the criteria because...</p>
+
+                    <div class="policy-clause" id="policy-clause-box">
+                        <h5>Policy Rationale & Guidance:</h5>
+                        <p id="policy-clause-text">WP No. 68 Section 3(a)</p>
+                    </div>
+
+                    <div class="action-buttons">
+                        <button onclick="app.goBack()" class="btn btn-secondary">
+                            <i class="fa-solid fa-arrow-left"></i> Back to Question
+                        </button>
+                        <button onclick="app.resetCurrentFlow()" class="btn btn-secondary">
+                            <i class="fa-solid fa-rotate-left"></i> Start Over
+                        </button>
+                        <button onclick="app.showHome()" class="btn btn-primary">
+                            <i class="fa-solid fa-house"></i> Home
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- RESULTS & CALCULATOR VIEW -->
+        <section id="result-view" class="view">
+            <div class="result-header">
+                <button onclick="app.showHome()" class="btn-back">
+                    <i class="fa-solid fa-house"></i> Back to Home
+                </button>
+                <span class="flow-category-badge" id="result-flow-badge">Flow Category</span>
+            </div>
+
+            <div class="result-layout">
+                <!-- Result Status Column -->
+                <div class="glass-card status-panel">
+                    <div class="result-icon-wrapper green animate-scale">
+                        <i class="fa-solid fa-circle-check"></i>
+                    </div>
+                    <h2>Congratulations!</h2>
+                    <p id="result-main-message">You are eligible for NUST Sponsorship / Award.</p>
+
+                    <div class="checklist-box">
+                        <h3><i class="fa-solid fa-list-check"></i> Mandatory Next Steps</h3>
+                        <ul id="next-steps-list" class="checklist-items">
+                            <!-- Dynamic checklist items -->
+                        </ul>
+                    </div>
+
+                    <div class="alert-info-box">
+                        <i class="fa-solid fa-circle-info"></i>
+                        <span id="result-note-text">Ensure you submit your application at least 65 days prior to the
+                            event.</span>
+                    </div>
+
+                    <div class="action-buttons justify-center">
+                        <button onclick="app.resetCurrentFlow()" class="btn btn-secondary">
+                            <i class="fa-solid fa-rotate-left"></i> Run Again
+                        </button>
+                        <button onclick="app.showHome()" class="btn btn-primary">
+                            <i class="fa-solid fa-house"></i> Back Home
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Calculator Column (Conditional) -->
+                <div id="calculator-panel" class="glass-card calculator-panel hidden">
+                    <div class="calc-header">
+                        <i class="fa-solid fa-calculator calc-logo"></i>
+                        <div>
+                            <h3>Grant Calculator</h3>
+                            <p>Estimate the sponsored amount based on policy rules.</p>
+                        </div>
+                    </div>
+
+                    <div id="calculator-inputs" class="calc-inputs">
+                        <!-- Dynamic inputs based on flow -->
+                    </div>
+
+                    <div class="calc-divider"></div>
+
+                    <div class="calc-results">
+                        <h4>Estimated Grant Breakdown</h4>
+                        <div class="results-table" id="calc-results-table">
+                            <!-- Dynamic breakdown rows -->
+                        </div>
+
+                        <div class="grand-total-box">
+                            <span class="total-label">Estimated NUST Share</span>
+                            <span class="total-value" id="calc-grand-total">$0.00</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="app-footer">
+        <p>&copy; 2026 National University of Sciences & Technology. All rights reserved. Developed for NUST Research
+            Directorate.</p>
+        <p class="footer-sub">Policy data updated as per WP No. 66 & 68 (Feb 2026)</p>
+    </footer>
+
+    <!-- Custom Logic Script -->
+    <script src="app.js"></script>
+</body>
+
+</html>
