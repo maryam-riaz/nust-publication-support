@@ -1,6 +1,6 @@
 # Grants and Awards Eligibility Portal
 
-Developed as part of an internship project for the **Research Publication & Development Directorate (DD)** at **NUST Research, Innovation & Commercialization (RIC)**.
+Developed as part of an internship project for the **DD Research Publication** at **NUST Research, Innovation & Commercialization (RIC)**.
 
 ## Overview
 
