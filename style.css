@@ -562,6 +562,35 @@ a.policy-tag:hover {
     background: rgba(59, 130, 246, 0.05);
 }
 
+/* NRP Upload Priority Banner */
+.nrp-priority-banner {
+    background: rgba(245, 158, 11, 0.1);
+    border: 1px solid rgba(245, 158, 11, 0.3);
+    border-left: 4px solid #f59e0b;
+    padding: 1rem 1.25rem;
+    border-radius: var(--border-radius-md);
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    font-size: 0.9rem;
+    color: var(--text-primary);
+    margin-bottom: 1rem;
+    line-height: 1.5;
+}
+
+.nrp-priority-banner i {
+    color: #f59e0b;
+    font-size: 1.2rem;
+    margin-top: 0.1rem;
+}
+
+/* Highlighted Affirmation for NRP */
+.checkbox-highlight {
+    border-color: rgba(59, 130, 246, 0.4) !important;
+    background: rgba(59, 130, 246, 0.08) !important;
+    border-width: 2px !important;
+}
+
 /* Submit Multi-Affirmation Button */
 .btn-submit-assertions {
     margin-top: 1.5rem;
@@ -638,6 +667,20 @@ a.policy-tag:hover {
     font-size: 0.85rem;
     color: var(--text-secondary);
     line-height: 1.5;
+}
+
+.policy-ref-link {
+    color: var(--accent-blue);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-weight: 600;
+}
+
+.policy-ref-link:hover {
+    text-decoration: underline;
+    color: var(--accent-purple);
 }
 
 /* Custom Alert & General Buttons */
@@ -894,6 +937,22 @@ a.policy-tag:hover {
 
 .input-info-btn:hover {
     color: var(--text-primary);
+}
+
+.input-info-text {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    font-weight: 400;
+}
+
+.calc-subsection-label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 0.5rem 0;
 }
 
 .input-wrapper {

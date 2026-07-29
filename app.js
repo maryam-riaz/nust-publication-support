@@ -210,17 +210,30 @@ const app = {
                 text: 'What is the Web of Science (WoS) JCR quartile of the journal?',
                 desc: 'NUST publication financial awards (FA) are given for papers published in Q1, Q2, or Q3 journals.',
                 options: [
-                    { text: 'Quartile 1 (Q1), Quartile 2 (Q2), or Quartile 3 (Q3)', value: 'q123', next: 'paper_type' },
+                    { text: 'Quartile 1 (Q1)', value: 'q1', next: 'paper_type' },
+                    { text: 'Quartile 2 (Q2)', value: 'q2', next: 'paper_type' },
+                    { text: 'Quartile 3 (Q3)', value: 'q3', next: 'school_check' },
                     { text: 'Quartile 4 (Q4), ESCI, or Unindexed Journal', value: 'other', ineligible: 'Financial awards (FA) are only provided for research papers published in Web of Science (WoS) JCR indexed impact factor journals in the Q1, Q2, and Q3 quartiles. ESCI, Q4, and unindexed journals are not eligible.', ref: 'Financial Awards are designed to incentivize high-quality research. Only papers published in impact factor journals ranked in JCR Quartiles 1, 2, or 3 qualify for the award.' }
+                ]
+            },
+            {
+                id: 'school_check',
+                text: 'Which NUST School do you belong to?',
+                desc: 'Q3 Financial Awards are restricted to specific schools. Only NLS and NSHS qualify.',
+                options: [
+                    { text: 'NLS (Natural & Life Sciences)', value: 'nls', next: 'paper_type' },
+                    { text: 'NSHS (Social Sciences & Humanities)', value: 'nshs', next: 'paper_type' },
+                    { text: 'Other School / Not listed', value: 'other', ineligible: 'Q3 Financial Awards are restricted to NLS (Natural & Life Sciences) and NSHS (Social Sciences & Humanities) schools only. Please consult your school\'s research office for alternative funding options.', ref: 'Per policy, Q3 awards are limited to NLS and NSHS to ensure targeted support for disciplines where Q3 represents impactful publication venues.' }
                 ]
             },
             {
                 id: 'paper_type',
                 text: 'What format of research publication is this?',
-                desc: 'Conference proceedings and minor formats are excluded from publication awards.',
+                desc: 'Only full-length research articles are eligible. Review articles and minor formats are excluded.',
                 options: [
-                    { text: 'Full-length research article or Review article', value: 'article', next: 'timing' },
-                    { text: 'Letter to the Editor, Editorial, Abstract, Comment, Errata, Book Chapter, or Conference Proceeding', value: 'other', ineligible: 'Letters to the editor, editorials, abstracts, comments, errata, PhD thesis books, and conference papers are not eligible for cash financial awards.', ref: 'Publication cash awards are reserved for peer-reviewed full research papers and review articles. Abstracts, conference proceedings, letters, errata, and comments are excluded.' }
+                    { text: 'Full-length research article', value: 'article', next: 'timing' },
+                    { text: 'Review article', value: 'review', ineligible: 'Review articles are not eligible for the Financial Award. Only full-length research articles qualify.', ref: 'Financial Awards are intended for original research contributions. Review articles, while valuable, do not qualify under this policy.' },
+                    { text: 'Letter to the Editor, Editorial, Abstract, Comment, Errata, Book Chapter, or Conference Proceeding', value: 'other', ineligible: 'Letters to the editor, editorials, abstracts, comments, errata, PhD thesis books, and conference papers are not eligible for cash financial awards.', ref: 'Publication cash awards are reserved for peer-reviewed full research papers. Abstracts, conference proceedings, letters, errata, and comments are excluded.' }
                 ]
             },
             {
@@ -391,10 +404,18 @@ const app = {
         this.dom.answersContainer.innerHTML = '';
         
         if (question.type === 'affirmation') {
+            // Add NRP upload priority banner for APC flow
+            if (this.state.currentFlow === 'apc') {
+                const banner = document.createElement('div');
+                banner.className = 'nrp-priority-banner';
+                banner.innerHTML = `<i class="fa-solid fa-upload"></i> <strong>IMPORTANT:</strong> Uploading your manuscript to the NUST Research Portal (NRP) is the highest priority step and must be completed before processing your case.`;
+                this.dom.answersContainer.appendChild(banner);
+            }
+            
             // Render affirmation checkboxes
             question.checkboxes.forEach((cb, idx) => {
                 const item = document.createElement('div');
-                item.className = 'checkbox-option';
+                item.className = `checkbox-option ${cb.id === 'aff_nrp_upload' ? 'checkbox-highlight' : ''}`;
                 item.innerHTML = `
                     <input type="checkbox" id="${cb.id}" data-index="${idx}" onchange="app.handleCheckboxChange(this)">
                     <label class="checkbox-label" for="${cb.id}">${cb.text}</label>
@@ -490,7 +511,14 @@ const app = {
         this.dom.ineligibleReasonText.textContent = reasonText;
         if (refClause) {
             this.dom.policyClauseBox.classList.remove('hidden');
-            this.dom.policyClauseText.textContent = refClause;
+            // Convert ref text to clickable link based on flow
+            const policyUrls = {
+                conference: 'https://drive.google.com/file/d/12ayKPwL6wS1Aa16DVSdMb4MIWiwPk290/view',
+                apc: 'https://drive.google.com/file/d/1uVr-ZmnyCxOEbYfJ8WyvT32-GIEvjFtX/view',
+                fa: 'https://drive.google.com/file/d/1R6-IJMU6r7rKjJndcZ4ak5g-Nzp93PCD/view'
+            };
+            const url = policyUrls[this.state.currentFlow] || '#';
+            this.dom.policyClauseText.innerHTML = `<a href="${url}" target="_blank" class="policy-ref-link"><i class="fa-regular fa-file-pdf"></i> ${refClause}</a>`;
         } else {
             this.dom.policyClauseBox.classList.add('hidden');
         }
@@ -625,10 +653,11 @@ const app = {
             <div class="input-group">
                 <div class="input-label-row">
                     <label for="apc-fee">Actual Publication Fee (USD)</label>
+                    <span class="input-info-text" id="apc-fee-limit">Max: $1,800</span>
                 </div>
                 <div class="input-wrapper prefixed">
                     <span class="input-prefix">$</span>
-                    <input type="number" id="apc-fee" value="1500" min="0" oninput="app.updateAPCCalculation()">
+                    <input type="number" id="apc-fee" value="1500" min="0" max="1800" oninput="app.updateAPCCalculation()">
                 </div>
             </div>
             
@@ -737,7 +766,18 @@ const app = {
 
     updateAPCCalculation: function() {
         const quartile = document.getElementById('apc-quartile').value;
-        const actualFee = parseFloat(document.getElementById('apc-fee').value) || 0;
+        const limit = quartile === 'q1' ? 1800 : 1200;
+        const feeInput = document.getElementById('apc-fee');
+        const feeLimitLabel = document.getElementById('apc-fee-limit');
+        
+        // Enforce max limit
+        feeInput.max = limit;
+        feeLimitLabel.textContent = `Max: $${limit.toLocaleString()}`;
+        if (parseFloat(feeInput.value) > limit) {
+            feeInput.value = limit;
+        }
+        
+        const actualFee = parseFloat(feeInput.value) || 0;
         const exchangeRate = parseFloat(document.getElementById('apc-rate').value) || 278.0;
         const authorCount = parseInt(document.getElementById('apc-author-count').value);
         
@@ -754,7 +794,6 @@ const app = {
         });
         
         // Quartile limits
-        const limit = quartile === 'q1' ? 1800 : 1200;
         const totalSponsoredFeeUSD = Math.min(actualFee, limit);
         const totalSponsoredFeePKR = totalSponsoredFeeUSD * exchangeRate;
         
@@ -812,7 +851,34 @@ const app = {
 
     // --- FA CALCULATOR LOGIC ---
     setupFACalculator: function() {
+        const quartile = this.state.answers['quartile'] || 'q1';
+        const quartileLabel = quartile === 'q1' ? 'Q1' : quartile === 'q2' ? 'Q2' : 'Q3';
+        
         this.dom.calculatorInputs.innerHTML = `
+            <div class="input-group">
+                <label for="fa-quartile">Journal Quartile</label>
+                <div class="input-wrapper">
+                    <select id="fa-quartile" onchange="app.updateFACalculation()">
+                        <option value="q1" ${quartile === 'q1' ? 'selected' : ''}>Quartile 1 (Q1)</option>
+                        <option value="q2" ${quartile === 'q2' ? 'selected' : ''}>Quartile 2 (Q2)</option>
+                        <option value="q3" ${quartile === 'q3' ? 'selected' : ''}>Quartile 3 (Q3)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <div class="input-label-row">
+                    <label for="fa-percentile">Journal Percentile in Category</label>
+                    <span class="input-info-text">Optional — overrides TJ/PJ if >= 90</span>
+                </div>
+                <div class="input-wrapper">
+                    <input type="number" id="fa-percentile" min="0" max="100" value="" placeholder="e.g. 92" oninput="app.updateFACalculation()">
+                </div>
+            </div>
+            
+            <div class="calc-divider"></div>
+            <div class="calc-subsection-label">Or calculate by journal position:</div>
+            
             <div class="input-group">
                 <div class="input-label-row">
                     <label for="fa-tj">Total Journals in Category (TJ)</label>
@@ -956,6 +1022,11 @@ const app = {
     },
 
     updateFACalculation: function() {
+        const quartile = document.getElementById('fa-quartile').value;
+        const percentileInput = document.getElementById('fa-percentile');
+        const percentile = parseFloat(percentileInput.value);
+        const hasPercentile = !isNaN(percentile) && percentile >= 0;
+        
         const tjSlider = document.getElementById('fa-tj');
         const pjSlider = document.getElementById('fa-pj');
         const authorCount = parseInt(document.getElementById('fa-author-count').value);
@@ -988,12 +1059,40 @@ const app = {
             }
         });
         
-        // Base Award calculation: Formula: 45000 + 30000 * (TJ - PJ) / (TJ - 1)
+        // Determine formula constants based on quartile
+        let formulaBase = 0, formulaMultiplier = 0;
+        if (quartile === 'q1') {
+            formulaBase = 40000;
+            formulaMultiplier = 60000;
+        } else if (quartile === 'q2') {
+            formulaBase = 35000;
+            formulaMultiplier = 20000;
+        } else { // q3
+            formulaBase = 20000;
+            formulaMultiplier = 5000;
+        }
+        
+        // Calculate base award using TJ/PJ formula
         let baseAward = 0;
         if (tj > 1) {
-            baseAward = 45000 + 30000 * ((tj - pj) / (tj - 1));
+            baseAward = formulaBase + formulaMultiplier * ((tj - pj) / (tj - 1));
         } else {
-            baseAward = 75000;
+            baseAward = formulaBase + formulaMultiplier;
+        }
+        
+        // Percentile overrides
+        let percentileNote = '';
+        if (hasPercentile) {
+            if (percentile >= 95) {
+                baseAward = 150000;
+                percentileNote = ' (Percentile >= 95: fixed Rs. 150,000)';
+            } else if (percentile >= 90) {
+                const capped = Math.min(baseAward, 120000);
+                if (capped < baseAward) {
+                    percentileNote = ` (Capped at Rs. 120,000 per 90-95 percentile rule)`;
+                }
+                baseAward = capped;
+            }
         }
         
         // Authorship split calculations
@@ -1021,13 +1120,24 @@ const app = {
             `;
         });
         
+        // Quartile labels
+        const qLabels = { q1: 'Q1', q2: 'Q2', q3: 'Q3' };
+        
         // Render results table
         this.dom.calcResultsTable.innerHTML = `
+            <div class="results-row">
+                <span>Journal Quartile:</span>
+                <span>${qLabels[quartile] || quartile}</span>
+            </div>
             <div class="results-row">
                 <span>Journal Position Index:</span>
                 <span>${pj} / ${tj}</span>
             </div>
-            <div class="results-row">
+            ${hasPercentile ? `<div class="results-row">
+                <span>Journal Percentile:</span>
+                <span>${percentile}${percentileNote}</span>
+            </div>` : ''}
+            <div class="results-row highlighted">
                 <span>Base Publication Award:</span>
                 <span>Rs. ${Math.round(baseAward).toLocaleString()}/-</span>
             </div>
