@@ -1,0 +1,254 @@
+/* NUST Publication Assistant — chat widget */
+:root {
+  --nust-chat-green: #0f7a4d;
+  --nust-chat-green-dark: #0a5c3a;
+  --nust-chat-bg: #ffffff;
+  --nust-chat-user-bg: #e6f4ec;
+  --nust-chat-assistant-bg: #f1f3f5;
+  --nust-chat-border: #d9dee3;
+  --nust-chat-text: #1a1f2b;
+  --nust-chat-muted: #6b7280;
+  --nust-chat-shadow: 0 8px 30px rgba(0, 0, 0, 0.18);
+}
+
+#nust-chat-widget *,
+#nust-chat-widget *::before,
+#nust-chat-widget *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+}
+
+#nust-chat-fab {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 2147483000;
+  width: 58px;
+  height: 58px;
+  border: none;
+  border-radius: 50%;
+  background: var(--nust-chat-green);
+  color: #fff;
+  font-size: 26px;
+  cursor: pointer;
+  box-shadow: var(--nust-chat-shadow);
+  transition: transform 0.15s ease, background 0.15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#nust-chat-fab:hover {
+  background: var(--nust-chat-green-dark);
+  transform: scale(1.06);
+}
+
+#nust-chat-panel {
+  position: fixed;
+  right: 20px;
+  bottom: 92px;
+  z-index: 2147483001;
+  width: 380px;
+  max-width: calc(100vw - 40px);
+  height: 560px;
+  max-height: calc(100vh - 120px);
+  display: flex;
+  flex-direction: column;
+  background: var(--nust-chat-bg);
+  border: 1px solid var(--nust-chat-border);
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: var(--nust-chat-shadow);
+}
+
+#nust-chat-widget[data-open="false"] #nust-chat-panel,
+#nust-chat-widget #nust-chat-panel[hidden] {
+  display: none;
+}
+
+#nust-chat-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 14px 16px;
+  background: var(--nust-chat-green);
+  color: #fff;
+  flex-shrink: 0;
+}
+
+#nust-chat-header strong {
+  display: block;
+  font-size: 15px;
+}
+
+#nust-chat-header small {
+  display: block;
+  font-size: 12px;
+  opacity: 0.85;
+  margin-top: 2px;
+}
+
+#nust-chat-clear {
+  background: rgba(255, 255, 255, 0.18);
+  border: none;
+  color: #fff;
+  font-size: 12px;
+  padding: 5px 9px;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+#nust-chat-clear:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+#nust-chat-close {
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 4px;
+}
+
+#nust-chat-close:hover {
+  opacity: 0.8;
+}
+
+#nust-chat-messages {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: #fafbfc;
+}
+
+.nust-chat-msg {
+  max-width: 85%;
+  padding: 9px 12px;
+  border-radius: 12px;
+  font-size: 14px;
+  line-height: 1.5;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+}
+
+.nust-chat-msg.user {
+  align-self: flex-end;
+  background: var(--nust-chat-user-bg);
+  color: var(--nust-chat-text);
+  border-bottom-right-radius: 3px;
+}
+
+.nust-chat-msg.assistant {
+  align-self: flex-start;
+  background: var(--nust-chat-assistant-bg);
+  color: var(--nust-chat-text);
+  border-bottom-left-radius: 3px;
+}
+
+.nust-chat-msg.error {
+  align-self: flex-start;
+  background: #fdecec;
+  color: #b42318;
+}
+
+.nust-chat-msg strong {
+  font-weight: 600;
+}
+
+.nust-chat-msg ul {
+  margin: 6px 0 6px 18px;
+  padding: 0;
+}
+
+.nust-chat-msg li {
+  margin: 2px 0;
+}
+
+.nust-chat-msg code {
+  background: rgba(0, 0, 0, 0.07);
+  padding: 1px 5px;
+  border-radius: 4px;
+  font-size: 13px;
+}
+
+.nust-chat-sources {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px dashed var(--nust-chat-border);
+  font-size: 12px;
+  color: var(--nust-chat-muted);
+}
+
+.nust-chat-sources strong {
+  color: var(--nust-chat-text);
+}
+
+.nust-chat-typing {
+  align-self: flex-start;
+  color: var(--nust-chat-muted);
+  font-size: 13px;
+  font-style: italic;
+}
+
+#nust-chat-form {
+  display: flex;
+  gap: 8px;
+  padding: 10px;
+  border-top: 1px solid var(--nust-chat-border);
+  flex-shrink: 0;
+  background: var(--nust-chat-bg);
+}
+
+#nust-chat-input {
+  flex: 1 1 auto;
+  border: 1px solid var(--nust-chat-border);
+  border-radius: 999px;
+  padding: 10px 14px;
+  font-size: 14px;
+  outline: none;
+}
+
+#nust-chat-input:focus {
+  border-color: var(--nust-chat-green);
+}
+
+#nust-chat-send {
+  border: none;
+  border-radius: 999px;
+  background: var(--nust-chat-green);
+  color: #fff;
+  padding: 0 18px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+#nust-chat-send:hover {
+  background: var(--nust-chat-green-dark);
+}
+
+#nust-chat-send:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+@media (max-width: 480px) {
+  #nust-chat-panel {
+    right: 10px;
+    bottom: 80px;
+    width: calc(100vw - 20px);
+    height: 70vh;
+  }
+
+  #nust-chat-fab {
+    right: 14px;
+    bottom: 14px;
+  }
+}
