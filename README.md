@@ -44,6 +44,7 @@ All three policies were approved at the **73rd ACM held on 9th February 2026**. 
 ├── style.css       — Design system with dark/light mode, responsive layout, animations
 ├── chat-widget.js  — AI Chat Assistant widget (auto-injects its stylesheet)
 ├── chat-widget.css — Styles for the chat widget (bottom-right bubble/panel)
+├── design.md      — Design system spec (tokens, components, widget conformance)
 ├── context.md      — Full policy context and architecture documentation
 └── README.md       — This file
 ```
@@ -58,6 +59,7 @@ A bottom-right chatbot widget (backed by a hosted RAG API) that answers question
 - **Stateless:** the accumulated message history is sent with every request, so follow-ups work automatically.
 - **No API keys in the browser:** the LLM (Groq) key lives only on the backend.
 - **CORS:** the API allows requests from `https://nust-publication-support.vercel.app` and `http://localhost:3000`.
+- **Design conformance:** the widget is styled to match the portal's design system (see `design.md` §9) — it consumes the app's shared CSS variables, so it inherits dark/light automatically, and uses FontAwesome icons (`fa-comments` FAB, `fa-trash-can` clear, `fa-xmark` close).
 
 ## Local Development
 

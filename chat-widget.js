@@ -35,15 +35,17 @@
   widget.id = "nust-chat-widget";
   widget.setAttribute("data-open", "false");
   widget.innerHTML =
-    '<button id="nust-chat-fab" type="button" aria-label="Open chat">\uD83D\uDCAC</button>' +
+    '<button id="nust-chat-fab" type="button" aria-label="Open chat"><i class="fa-solid fa-comments"></i></button>' +
     '<div id="nust-chat-panel" hidden>' +
     '  <div id="nust-chat-header">' +
-    '    <div>' +
+    '    <div class="nust-chat-header-title">' +
     '      <strong>NUST Publication Assistant</strong>' +
     '      <small>Ask about publication policies</small>' +
     "    </div>" +
-    '    <button id="nust-chat-clear" type="button" title="Clear conversation">Clear</button>' +
-    '    <button id="nust-chat-close" type="button" aria-label="Close chat">&times;</button>' +
+    '    <div class="nust-chat-header-actions">' +
+    '      <button id="nust-chat-clear" type="button" title="Clear conversation" aria-label="Clear conversation"><i class="fa-solid fa-trash-can"></i></button>' +
+    '      <button id="nust-chat-close" type="button" aria-label="Close chat"><i class="fa-solid fa-xmark"></i></button>' +
+    "    </div>" +
     "  </div>" +
     '  <div id="nust-chat-messages"></div>' +
     '  <form id="nust-chat-form">' +
@@ -98,7 +100,7 @@
   function addTyping() {
     var el = document.createElement("div");
     el.className = "nust-chat-typing";
-    el.textContent = "Thinking...";
+    el.innerHTML = "<span></span><span></span><span></span>";
     messagesEl.appendChild(el);
     scrollToBottom();
     return el;

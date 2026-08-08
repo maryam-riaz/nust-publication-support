@@ -10,8 +10,8 @@ A single-page vanilla JS application that helps NUST faculty and students determ
 - `index.html` — 3-view SPA (landing, wizard/stepper, result/calculator)
 - `app.js` (~1221 lines) — state machine, question database, eligibility logic, calculator engines
 - `style.css` (~1295 lines) — design system with dark/light mode, responsive grid, animations
-- `chat-widget.js` (~231 lines) — AI Chat Assistant widget (IIFE, auto-injects stylesheet)
-- `chat-widget.css` (~254 lines) — chat widget styling (bottom-right bubble/panel)
+- `chat-widget.js` (~233 lines) — AI Chat Assistant widget (IIFE, auto-injects stylesheet)
+- `chat-widget.css` (~366 lines) — chat widget styling (bottom-right bubble/panel)
 
 ---
 
@@ -244,7 +244,8 @@ A bottom-right chatbot that answers questions about NUST publication policies. I
   - `{"error": "…"}` — terminal failure (no `done` follows).
   - Greetings/gibberish get canned replies; questions with no policy match return a "not enough information" message with empty sources.
 - **Stateless:** the accumulated message history is sent with every request, so follow-ups work automatically. The Clear button resets the local conversation.
-- **CORS:** the API allows `https://nust-publication-support.vercel.app` and `http://localhost:3000`. To test locally, serve the folder (e.g. `npx http-server -p 3000`) rather than opening `file://`.
+- **Design conformance:** the widget is restyled to match the app's design system (per `design.md` §9). It consumes the app's shared CSS variables — blue-gradient FAB (`fa-comments`), glass card panel, neutral `--bg-secondary` header, identical 30px icon-button clear/close (`fa-trash-can` / `fa-xmark`), blue-tinted user + input-surface assistant bubbles, animated typing dots — so it inherits dark/light automatically with no hard-coded theme colors. `index.html` also declares an inline SVG favicon (line 8) to prevent a `/favicon.ico` 404.
+- **CORS:** the API allows `https://nust-publication-support.vercel.app` and `http://localhost:3000`. To test locally, serve the folder (e.g. `npx http-server -p 3000 -c-1`) rather than opening `file://`.
 - **Security:** the Groq/LLM key lives only on the Render backend — never in the browser or this repo.
 
 ---
@@ -280,8 +281,8 @@ A bottom-right chatbot that answers questions about NUST publication policies. I
 | APC Calculator (setup + calc) | `app.js` | 639–850 |
 | FA Calculator (setup + calc) | `app.js` | 853–1155 |
 | Author share computation | `app.js` | 1156–1215 |
-| Chat widget JS (IIFE) | `chat-widget.js` | 1–231 |
-| Chat widget CSS | `chat-widget.css` | 1–254 |
+| Chat widget JS (IIFE) | `chat-widget.js` | 1–233 |
+| Chat widget CSS | `chat-widget.css` | 1–366 |
 | Design system (variables) | `style.css` | 1–60 |
 | Landing cards grid | `style.css` | 208–318 |
 | Wizard/stepper | `style.css` | 370–520 |
