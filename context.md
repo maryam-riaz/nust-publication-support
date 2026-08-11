@@ -172,9 +172,9 @@ Where:
 
 **Percentile overrides (`app.js:1083-1096`):**
 - Percentile ≥ 95 → fixed award of **Rs. 150,000**
-- Percentile 90–94 → base award **capped at Rs. 120,000**
+- Percentile 90–94 → fixed award of **Rs. 120,000** (irrespective of Quartile/TJ/PJ)
 
-**Author share tables:** [100], [60,40], [50,35,15], [45,30,15,10].
+**Author share tables:** [100], [60,40], [50,35,15], [45,30,15,10]. **FA only:** the 5th author onwards each NUST author gets **10%** — the share table extends to `[45, 30, 15, 10, 10, 10, …]` for `flow === 'fa'` (`calculateAuthorShares()`); APC stays capped at the first 4 authors. The FA calculator caps total entered authors at **10** (`getFAAuthorCount()`). **No cap on the summed NUST share** — it can exceed 100% if many authors are NUST (literal policy reading).
 
 **Corresponding author repositioning:** If NUST corresponding author is beyond index 2, moved to index 1 (2nd author position) — **stricter than APC** (which uses threshold 4).
 
@@ -265,6 +265,9 @@ A bottom-right chatbot that answers questions about NUST publication policies. I
 | APC: Q1 limit $1,800, Q2 limit $1,200 | ✅ Present | Matches policy |
 | FA formula: Q1 `40000 + 60000 × (TJ-PJ)/(TJ-1)` | ✅ Present | Implemented in `updateFACalculation()` (`app.js:1024`) |
 | Author share split tables | ✅ Present | `calculateAuthorShares()` — [100], [60,40], [50,35,15], [45,30,15,10] |
+| FA: 4th author onwards each NUST author gets 10% | ✅ Present (FA) | `calculateAuthorShares()` (`app.js:1177`) extends the share table to `[45,30,15,10,10,10,…]` for `flow === 'fa'`; APC stays capped at the first 4 authors |
+| FA: total-author input capped at 10 | ✅ Present | `getFAAuthorCount()` (`app.js:946`) clamps the "5 or more Authors" total to 5–10 |
+| FA: percentile 90–94 = fixed Rs. 120,000 | ✅ Present | `updateFACalculation()` (`app.js:1113`) sets base to Rs. 120,000 irrespective of Quartile/TJ/PJ; ≥95 → fixed Rs. 150,000 |
 | Corr. author repositioning (FA: threshold 2, APC: threshold 4) | ✅ Present | `threshold = flow === 'fa' ? 2 : 4` |
 | No double-dipping APC + FA | ✅ Present | Mutual affirmations in both flows |
 
@@ -279,8 +282,8 @@ A bottom-right chatbot that answers questions about NUST publication policies. I
 | Question DB — FA | `app.js` | 207–248 |
 | Eligibility evaluation | `app.js` | 552–635 |
 | APC Calculator (setup + calc) | `app.js` | 639–850 |
-| FA Calculator (setup + calc) | `app.js` | 853–1155 |
-| Author share computation | `app.js` | 1156–1215 |
+| FA Calculator (setup + calc) | `app.js` | 853–1176 |
+| Author share computation | `app.js` | 1177–1248 |
 | Chat widget JS (IIFE) | `chat-widget.js` | 1–233 |
 | Chat widget CSS | `chat-widget.css` | 1–366 |
 | Design system (variables) | `style.css` | 1–60 |

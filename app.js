@@ -922,6 +922,16 @@ const app = {
                     </select>
                 </div>
                 
+                <div class="input-group" id="fa-total-author-group" style="display:none;">
+                    <div class="input-label-row">
+                        <label for="fa-total-author-count">Total Number of Authors</label>
+                        <span class="input-info-text">Max 10</span>
+                    </div>
+                    <div class="input-wrapper">
+                        <input type="number" id="fa-total-author-count" min="5" max="10" value="5" oninput="app.handleFAAuthorCountChange()">
+                    </div>
+                </div>
+                
                 <div class="author-builder">
                     <div class="author-list" id="fa-author-list">
                         <!-- Rendered dynamically -->
@@ -933,13 +943,27 @@ const app = {
         this.handleFAAuthorCountChange();
     },
 
+    getFAAuthorCount: function() {
+        const selectVal = parseInt(document.getElementById('fa-author-count').value);
+        if (selectVal !== 5) return selectVal;
+        const input = document.getElementById('fa-total-author-count');
+        let n = parseInt(input.value);
+        if (isNaN(n)) n = 5;
+        n = Math.max(5, Math.min(10, n));
+        input.value = n;
+        return n;
+    },
+
     handleFAAuthorCountChange: function() {
         const countSelect = document.getElementById('fa-author-count');
-        let count = parseInt(countSelect.value);
+        const selectVal = parseInt(countSelect.value);
+        const count = selectVal === 5 ? this.getFAAuthorCount() : selectVal;
         const container = document.getElementById('fa-author-list');
         const countLabel = document.getElementById('fa-author-count-label');
+        const totalAuthorGroup = document.getElementById('fa-total-author-group');
+        if (totalAuthorGroup) totalAuthorGroup.style.display = selectVal === 5 ? 'block' : 'none';
         
-        countLabel.textContent = count === 5 ? '5 or more Authors' : `${count} ${count === 1 ? 'Author' : 'Authors'}`;
+        countLabel.textContent = count === 1 ? '1 Author' : `${count} Authors`;
         
         // Save old values if any
         const oldState = [];
@@ -1029,7 +1053,7 @@ const app = {
         
         const tjSlider = document.getElementById('fa-tj');
         const pjSlider = document.getElementById('fa-pj');
-        const authorCount = parseInt(document.getElementById('fa-author-count').value);
+        const authorCount = this.getFAAuthorCount();
         
         let tj = parseInt(tjSlider.value);
         let pj = parseInt(pjSlider.value);
@@ -1087,11 +1111,8 @@ const app = {
                 baseAward = 150000;
                 percentileNote = ' (Percentile >= 95: fixed Rs. 150,000)';
             } else if (percentile >= 90) {
-                const capped = Math.min(baseAward, 120000);
-                if (capped < baseAward) {
-                    percentileNote = ` (Capped at Rs. 120,000 per 90-95 percentile rule)`;
-                }
-                baseAward = capped;
+                baseAward = 120000;
+                percentileNote = ' (Percentile 90-94: fixed Rs. 120,000)';
             }
         }
         
@@ -1103,7 +1124,7 @@ const app = {
         
         // Build rows for individual NUST authors
         let authorRowsHTML = '';
-        const ordinalNames = ['1st Author', '2nd Author', '3rd Author', '4th Author', '5th Author', '6th Author'];
+        const ordinalNames = ['1st Author', '2nd Author', '3rd Author', '4th Author', '5th Author', '6th Author', '7th Author', '8th Author', '9th Author', '10th Author'];
         results.individualShares.forEach(share => {
             const authorSharePKR = baseAward * (share.sharePercentage / 100);
             
@@ -1176,9 +1197,21 @@ const app = {
             4: [45, 30, 15, 10]
         };
         
-        // Limit calculation to the first 4 authors in the revised list
-        const calcCount = Math.min(authorCount, 4);
-        const shareTable = shareTables[calcCount] || shareTables[4];
+        const isFA = this.state.currentFlow === 'fa';
+        let shareTable;
+        let calcCount;
+        if (isFA) {
+            // FA rule: 4th author onwards, each NUST author gets 10%
+            shareTable = [...shareTables[4]];   // [45, 30, 15, 10]
+            for (let i = 4; i < authorCount; i++) {
+                shareTable.push(10);
+            }
+            calcCount = authorCount;
+        } else {
+            // APC: unchanged — capped at first 4 authors
+            calcCount = Math.min(authorCount, 4);
+            shareTable = shareTables[calcCount] || shareTables[4];
+        }
         
         let nustTotalPercentage = 0;
         let breakdownParts = [];
