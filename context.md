@@ -152,7 +152,7 @@ All three policies were approved at the **73rd ACM held on 9th February 2026**. 
 
 ### 5.2 FA Award Calculator (from app.js)
 
-**Base Award Formula (quartile-specific constants, `app.js:1062-1081`):**
+**Base Award Formula (quartile-specific constants, `app.js:1078-1093`):**
 
 ```
 baseAward = formulaBase + formulaMultiplier × (TJ − PJ) / (TJ − 1)
@@ -167,14 +167,20 @@ baseAward = formulaBase + formulaMultiplier × (TJ − PJ) / (TJ − 1)
 If `TJ = 1`, the multiplier is added in full (`baseAward = formulaBase + formulaMultiplier`).
 
 Where:
-- **TJ** = Total number of journals in the WoS JCR category (2–250)
+- **TJ** = Total number of journals in the WoS JCR category (2–1000)
 - **PJ** = Journal's position rank in that category (1 = best)
 
-**Percentile overrides (`app.js:1083-1096`):**
-- Percentile ≥ 95 → fixed award of **Rs. 150,000**
-- Percentile 90–94 → fixed award of **Rs. 120,000** (irrespective of Quartile/TJ/PJ)
+**Percentile — computed, not entered (`1 − PJ/TJ`):**
+- Q1: percentile ≥ 0.95 → fixed award of **Rs. 150,000** (irrespective of formula)
+- Q1: percentile ≥ 0.90 → fixed award of **Rs. 120,000** (irrespective of formula)
+- Q1 below 0.90 → standard formula. Q2/Q3 → formula only (no tiers).
 
-**Author share tables:** [100], [60,40], [50,35,15], [45,30,15,10]. **FA only:** the 5th author onwards each NUST author gets **10%** — the share table extends to `[45, 30, 15, 10, 10, 10, …]` for `flow === 'fa'` (`calculateAuthorShares()`); APC stays capped at the first 4 authors. The FA calculator caps total entered authors at **10** (`getFAAuthorCount()`). **No cap on the summed NUST share** — it can exceed 100% if many authors are NUST (literal policy reading).
+**FA author share tables:**
+- **1–4 authors:** [100], [60,40], [50,35,15], [45,30,15,10] by total author count.
+- **5+ authors with 0 or 1 NUST author in the first 4 positions:** positional table `[70, 60, 40, 10, 10, 10, …]` (positions 1–3 = 70/60/40, 4th onwards = 10 each).
+- **5+ authors with 2+ NUST authors in the first 4 positions:** table chosen by **total NUST count** and assigned to NUST authors **in order of appearance** — total NUST ≥4 → `[45,30,15,10]`; =3 → `[50,35,15]`; =2 → `[60,40]`.
+- The FA calculator caps total entered authors at **10** (`getFAAuthorCount()`). **No cap on the summed NUST share** — with the `[70,60,40,…]` table it can exceed 100% (literal policy reading).
+- APC stays capped at the first 4 authors with `[45,30,15,10]` (via `calculateAuthorShares()`).
 
 **Corresponding author repositioning:** If NUST corresponding author is beyond index 2, moved to index 1 (2nd author position) — **stricter than APC** (which uses threshold 4).
 
@@ -263,11 +269,12 @@ A bottom-right chatbot that answers questions about NUST publication policies. I
 | Ex-post facto approval not entertained | **Missing** | Not mentioned |
 | FA: only Q1-Q3 (code asks Q1/Q2/Q3 as one option) | ✅ Present | Code combines Q1/Q2/Q3 into single option — correct per policy |
 | APC: Q1 limit $1,800, Q2 limit $1,200 | ✅ Present | Matches policy |
-| FA formula: Q1 `40000 + 60000 × (TJ-PJ)/(TJ-1)` | ✅ Present | Implemented in `updateFACalculation()` (`app.js:1024`) |
+| FA formula: Q1 `40000 + 60000 × (TJ-PJ)/(TJ-1)` | ✅ Present | Implemented in `updateFACalculation()` (`app.js:1037`) |
+| FA: percentile computed as `1 − PJ/TJ` (Q1: ≥0.95 → Rs. 150k, ≥0.90 → Rs. 120k) | ✅ Present | `updateFACalculation()` (`app.js:1060-1080`) — no input field; TJ/PJ range 2–1000 |
 | Author share split tables | ✅ Present | `calculateAuthorShares()` — [100], [60,40], [50,35,15], [45,30,15,10] |
-| FA: 4th author onwards each NUST author gets 10% | ✅ Present (FA) | `calculateAuthorShares()` (`app.js:1177`) extends the share table to `[45,30,15,10,10,10,…]` for `flow === 'fa'`; APC stays capped at the first 4 authors |
-| FA: total-author input capped at 10 | ✅ Present | `getFAAuthorCount()` (`app.js:946`) clamps the "5 or more Authors" total to 5–10 |
-| FA: percentile 90–94 = fixed Rs. 120,000 | ✅ Present | `updateFACalculation()` (`app.js:1113`) sets base to Rs. 120,000 irrespective of Quartile/TJ/PJ; ≥95 → fixed Rs. 150,000 |
+| FA: 5+ authors, 0/1 NUST in first 4 → `[70,60,40,10,10,…]` | ✅ Present (FA) | `calculateAuthorShares()` (`app.js:1166`) positional table; APC stays capped at the first 4 authors |
+| FA: 5+ authors, 2+ NUST in first 4 → table by total NUST count, assigned in NUST order | ✅ Present (FA) | `calculateAuthorShares()` (`app.js:1166`) — total NUST ≥4 → `[45,30,15,10]`; =3 → `[50,35,15]`; =2 → `[60,40]` |
+| FA: total-author input capped at 10 | ✅ Present | `getFAAuthorCount()` (`app.js:935`) clamps the "5 or more Authors" total to 5–10 |
 | Corr. author repositioning (FA: threshold 2, APC: threshold 4) | ✅ Present | `threshold = flow === 'fa' ? 2 : 4` |
 | No double-dipping APC + FA | ✅ Present | Mutual affirmations in both flows |
 
@@ -282,8 +289,8 @@ A bottom-right chatbot that answers questions about NUST publication policies. I
 | Question DB — FA | `app.js` | 207–248 |
 | Eligibility evaluation | `app.js` | 552–635 |
 | APC Calculator (setup + calc) | `app.js` | 639–850 |
-| FA Calculator (setup + calc) | `app.js` | 853–1176 |
-| Author share computation | `app.js` | 1177–1248 |
+| FA Calculator (setup + calc) | `app.js` | 853–1165 |
+| Author share computation | `app.js` | 1166–1237 |
 | Chat widget JS (IIFE) | `chat-widget.js` | 1–233 |
 | Chat widget CSS | `chat-widget.css` | 1–366 |
 | Design system (variables) | `style.css` | 1–60 |

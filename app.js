@@ -866,29 +866,18 @@ const app = {
                 </div>
             </div>
 
-            <div class="input-group">
-                <div class="input-label-row">
-                    <label for="fa-percentile">Journal Percentile in Category</label>
-                    <span class="input-info-text">Optional — overrides TJ/PJ if >= 90</span>
-                </div>
-                <div class="input-wrapper">
-                    <input type="number" id="fa-percentile" min="0" max="100" value="" placeholder="e.g. 92" oninput="app.updateFACalculation()">
-                </div>
-            </div>
-            
             <div class="calc-divider"></div>
-            <div class="calc-subsection-label">Or calculate by journal position:</div>
             
             <div class="input-group">
                 <div class="input-label-row">
                     <label for="fa-tj">Total Journals in Category (TJ)</label>
-                    <input type="number" id="fa-tj-val" class="slider-val-input" min="2" max="250" value="100" oninput="app.handleManualTJInput(this)" onblur="app.updateFACalculation()">
+                    <input type="number" id="fa-tj-val" class="slider-val-input" min="2" max="1000" value="100" oninput="app.handleManualTJInput(this)" onblur="app.updateFACalculation()">
                 </div>
                 <div class="slider-container">
-                    <input type="range" id="fa-tj" min="2" max="250" value="100" class="custom-slider" oninput="app.updateFACalculation()">
+                    <input type="range" id="fa-tj" min="2" max="1000" value="100" class="custom-slider" oninput="app.updateFACalculation()">
                     <div class="slider-labels">
                         <span>Min (2)</span>
-                        <span>Max (250)</span>
+                        <span>Max (1000)</span>
                     </div>
                 </div>
             </div>
@@ -896,10 +885,10 @@ const app = {
             <div class="input-group">
                 <div class="input-label-row">
                     <label for="fa-pj">Journal Position in Category (PJ)</label>
-                    <input type="number" id="fa-pj-val" class="slider-val-input" min="1" max="100" value="10" oninput="app.handleManualPJInput(this)" onblur="app.updateFACalculation()">
+                    <input type="number" id="fa-pj-val" class="slider-val-input" min="1" max="1000" value="10" oninput="app.handleManualPJInput(this)" onblur="app.updateFACalculation()">
                 </div>
                 <div class="slider-container">
-                    <input type="range" id="fa-pj" min="1" max="100" value="10" class="custom-slider" oninput="app.updateFACalculation()">
+                    <input type="range" id="fa-pj" min="1" max="1000" value="10" class="custom-slider" oninput="app.updateFACalculation()">
                     <div class="slider-labels">
                         <span>Best (1)</span>
                         <span>Worst (TJ)</span>
@@ -1015,7 +1004,7 @@ const app = {
         if (isNaN(val)) return;
         
         if (val < 2) val = 2;
-        if (val > 250) val = 250;
+        if (val > 1000) val = 1000;
         
         slider.value = val;
         
@@ -1047,9 +1036,6 @@ const app = {
 
     updateFACalculation: function() {
         const quartile = document.getElementById('fa-quartile').value;
-        const percentileInput = document.getElementById('fa-percentile');
-        const percentile = parseFloat(percentileInput.value);
-        const hasPercentile = !isNaN(percentile) && percentile >= 0;
         
         const tjSlider = document.getElementById('fa-tj');
         const pjSlider = document.getElementById('fa-pj');
@@ -1064,6 +1050,10 @@ const app = {
             pj = tj;
             pjSlider.value = tj;
         }
+        
+        // Percentile is computed from TJ/PJ (1 - PJ/TJ)
+        const percentile = tj > 0 ? 1 - (pj / tj) : 0;
+        const percentilePct = percentile * 100;
         
         // Update value displays (if not active element to prevent cursor jump)
         const tjValEl = document.getElementById('fa-tj-val');
@@ -1096,24 +1086,23 @@ const app = {
             formulaMultiplier = 5000;
         }
         
-        // Calculate base award using TJ/PJ formula
+        // Calculate base award — Q1 percentile tiers via 1 - PJ/TJ, otherwise TJ/PJ formula
         let baseAward = 0;
-        if (tj > 1) {
+        let percentileNote = '';
+        if (quartile === 'q1' && tj > 1) {
+            if (percentile >= 0.95) {
+                baseAward = 150000;
+                percentileNote = ' (≥95th percentile → fixed Rs. 150,000)';
+            } else if (percentile >= 0.90) {
+                baseAward = 120000;
+                percentileNote = ' (≥90th percentile → fixed Rs. 120,000)';
+            } else {
+                baseAward = formulaBase + formulaMultiplier * ((tj - pj) / (tj - 1));
+            }
+        } else if (tj > 1) {
             baseAward = formulaBase + formulaMultiplier * ((tj - pj) / (tj - 1));
         } else {
             baseAward = formulaBase + formulaMultiplier;
-        }
-        
-        // Percentile overrides
-        let percentileNote = '';
-        if (hasPercentile) {
-            if (percentile >= 95) {
-                baseAward = 150000;
-                percentileNote = ' (Percentile >= 95: fixed Rs. 150,000)';
-            } else if (percentile >= 90) {
-                baseAward = 120000;
-                percentileNote = ' (Percentile 90-94: fixed Rs. 120,000)';
-            }
         }
         
         // Authorship split calculations
@@ -1154,10 +1143,10 @@ const app = {
                 <span>Journal Position Index:</span>
                 <span>${pj} / ${tj}</span>
             </div>
-            ${hasPercentile ? `<div class="results-row">
+            <div class="results-row">
                 <span>Journal Percentile:</span>
-                <span>${percentile}${percentileNote}</span>
-            </div>` : ''}
+                <span>${percentilePct.toFixed(1)}%${percentileNote}</span>
+            </div>
             <div class="results-row highlighted">
                 <span>Base Publication Award:</span>
                 <span>Rs. ${Math.round(baseAward).toLocaleString()}/-</span>
@@ -1200,13 +1189,35 @@ const app = {
         const isFA = this.state.currentFlow === 'fa';
         let shareTable;
         let calcCount;
+        let assignByNustOrder = false;
         if (isFA) {
-            // FA rule: 4th author onwards, each NUST author gets 10%
-            shareTable = [...shareTables[4]];   // [45, 30, 15, 10]
-            for (let i = 4; i < authorCount; i++) {
-                shareTable.push(10);
+            if (authorCount <= 4) {
+                // Base tables by total author count
+                shareTable = [...(shareTables[authorCount] || shareTables[4])];
+                calcCount = authorCount;
+            } else {
+                // 5 or more authors
+                const nustInFirst4 = revisedAuthors.slice(0, 4).filter(a => a.isNust).length;
+                const totalNust = revisedAuthors.filter(a => a.isNust).length;
+                if (nustInFirst4 <= 1) {
+                    // 0 or 1 NUST author in the first 4 positions → positional table
+                    shareTable = [70, 60, 40];
+                    for (let i = 3; i < authorCount; i++) shareTable.push(10);
+                    calcCount = authorCount;
+                } else {
+                    // 2+ NUST authors in first 4 → table by total NUST count,
+                    // assigned to NUST authors in order of appearance
+                    if (totalNust >= 4) {
+                        shareTable = [45, 30, 15, 10];
+                    } else if (totalNust === 3) {
+                        shareTable = [50, 35, 15];
+                    } else {
+                        shareTable = [60, 40];
+                    }
+                    calcCount = authorCount;
+                    assignByNustOrder = true;
+                }
             }
-            calcCount = authorCount;
         } else {
             // APC: unchanged — capped at first 4 authors
             calcCount = Math.min(authorCount, 4);
@@ -1217,11 +1228,15 @@ const app = {
         let breakdownParts = [];
         let individualShares = [];
         
+        let nustCounter = 0;
         for (let i = 0; i < calcCount; i++) {
             const author = revisedAuthors[i];
-            const share = shareTable[i] || 0;
-            
             if (author && author.isNust) {
+                const share = assignByNustOrder
+                    ? (shareTable[nustCounter] || 0)
+                    : (shareTable[i] || 0);
+                if (assignByNustOrder) nustCounter++;
+                
                 nustTotalPercentage += share;
                 
                 // Track original author names/indexes for the text breakdown
